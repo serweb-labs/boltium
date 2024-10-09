@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block main %} 
+{% include 'components/records.twig' with { } only %} 
+<pagination resource="{{ contenttype }}"></pagination>
+{% endblock %}
+
+{% block left %} 
+<menu></menu>
+{% endblock %}
+
+{% block top %} 
+<user></user>
+{% endblock %}
+

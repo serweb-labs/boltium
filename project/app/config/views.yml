@@ -1,0 +1,78 @@
+tickets:
+  resource: tickets/{id}
+  guard: [isAdmin]
+  allow: [admin, client]
+  with: 
+    query: tickets/latest
+  components:
+    main:
+      - type: twig
+        name: records
+      - type: vue
+        name: pagination
+        binds: 
+          - key: resource
+            value: '{{ contenttype }}'
+    left:
+      - type: vue
+        name: menu
+    top:
+      - type: vue
+        name: user
+
+tickets/{id}:
+  resource: tickets/{id}
+  guard: [isAutorOrAdmin]
+  allow: [admin, client]
+  components:
+    main: []
+    left: []
+    top: []
+
+my-tickets:
+  resource: tickets(author=$userId)
+  guard: [isOwner]
+  allow: [client]
+  components:
+    main: []
+    left: []
+    top: []
+
+backoffice.list:
+  template: 
+  resource: backoffice/{contettype}/{page=1}
+  guard: []
+  allow: [admin, backofficer]
+  render: ::getRender
+  mode: simple
+  # mode: generated
+  components:
+    main:
+      - type: twig
+        name: list
+        binds: 
+          - key: records
+            value: records
+          - key: fields
+            value: "['slug', 'id']"
+          - key: contenttype
+            value: contenttype
+      - type: vue
+        name: pagination
+        binds: 
+          - key: resource
+            value: '{{ contenttype }}'
+    left: 
+      - type: vue
+        name: menu
+    top:
+      - type: vue
+        name: user
+
+backoffice.contenttype:
+  resource: backoffice/{contettype}/{page=1}
+  render: 'dynamics'
+  with: 
+    query: activity/latest by {latest 12, order asc} where {last_date > today, author = 15}
+  components: []
+

@@ -1,0 +1,14 @@
+{% extends 'basex.html.twig' %}
+{% block main %} 
+{% include 'components/list.twig' with { records: records, fields: ['slug', 'id'], contenttype: contenttype } only %} 
+<pagination resource="{{ contenttype }}"></pagination>
+{% endblock %}
+
+{% block left %} 
+<menu></menu>
+{% endblock %}
+
+{% block top %} 
+<user></user>
+{% endblock %}
+

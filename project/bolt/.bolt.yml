@@ -1,0 +1,9 @@
+paths:
+    web: '%site%/.'
+    bolt_assets: '%web%/app/view'
+
+extensions:
+    - Bundle\Site\CustomisationExtension
+
+services:
+    - Bundle\Views\Config\ViewsService
