@@ -37,5 +37,17 @@ RUN { \
     echo 'short_open_tag=Off'; \
 } > /usr/local/etc/php/conf.d/short_open_tag.ini
 
+# Instalar Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Establecer el directorio de trabajo
+WORKDIR /var/www/html
+
+# Instalar dependencias de Composer si el archivo composer.json existe
+COPY ./project /var/www/html
+RUN if [ -f "composer.json" ]; then composer install; fi
+
+RUN chown -R www-data:www-data /var/www/html/app
+
 # Limpiar cache de apt
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*

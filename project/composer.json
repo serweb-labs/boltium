@@ -12,7 +12,14 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./bolt",
+            "url": "./packages/bolt",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "./packages/themes",
             "options": {
                 "symlink": true
             }
