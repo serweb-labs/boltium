@@ -1,2 +1,4 @@
 composer.phar
 .env
+*:Zone.Identifier
+project/app/database/bolt.db
