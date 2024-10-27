@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Servicio para la aplicación PHP
   php:
@@ -11,10 +9,10 @@ services:
       - ./project:/var/www/html
       - verdor_data:/var/www/html/vendor
     environment:
-      - DATABASE_HOST=db
-      - DATABASE_NAME=bolt
-      - DATABASE_USER=bolt
-      - DATABASE_PASSWORD=secret
+      DATABASE_HOST: db
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_USER: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - db
 
@@ -25,23 +23,56 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: bolt
-      MYSQL_USER: bolt
-      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
 
   # Servicio para Nginx
   webserver:
     image: nginx:latest
     container_name: bolt_webserver_x
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf.template:/etc/nginx/conf.d/default.conf.template
+      - ./nginx/ssl.conf.template:/etc/nginx/conf.d/ssl.conf.template
+      - ./nginx/startup.sh:/var/www/startup.sh
       - ./project/public:/var/www/html/public
+      - certbot_certs:/etc/letsencrypt
+      - certbot_challenges:/var/www/certbot
     depends_on:
       - php
     ports:
       - "${HOST_PORT}:80"
+      - 443:443
+    environment:
+      ENABLE_SSL: ${ENABLE_SSL:+1}
+      DOMAIN: ${DOMAIN}
+    command: ["/bin/sh", "-c", "/var/www/startup.sh"]
 
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_challenges:/var/www/certbot
+    environment:
+      ENABLE_SSL: ${ENABLE_SSL:+1}
+    entrypoint: >
+      /bin/sh -c '
+      if [ "${ENABLE_SSL}" = "1" ]; then
+        trap exit TERM; 
+        while :; do 
+          certbot renew; 
+          sleep 12h & wait $${!}; 
+        done; 
+      else 
+        echo "Certbot is disabled."; 
+        tail -f /dev/null;
+      fi
+      '
+    depends_on:
+      - webserver
 volumes:
   db_data:
   verdor_data:
+  certbot_certs:
+  certbot_challenges:
